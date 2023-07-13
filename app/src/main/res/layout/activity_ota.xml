@@ -1,0 +1,24 @@
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <Button
+            android:id="@+id/bt_select_file"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:text="选择升级文件" />
+
+        <Button
+            android:id="@+id/bt_start_ota"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:text="开始推送" />
+
+    </LinearLayout>
+
+</layout>
