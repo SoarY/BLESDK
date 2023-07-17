@@ -14,4 +14,8 @@ interface ICmdToDeviceWrapper {
     fun  setPhoneType()
 
     fun  getFirmwareVer(): Observable<String>
+
+    fun  sendBigData(bigDataType:Int,size:Int,chunkLength:Int): Observable<Boolean>
+
+    fun  exSendBigData(data:ByteArray,index: Int): Observable<Boolean>
 }

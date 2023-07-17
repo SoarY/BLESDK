@@ -39,6 +39,9 @@
             android:name=".activity.DeviceOperationActivity"/>
 
         <activity
+            android:name=".activity.OTABigDataActivity"/>
+
+        <activity
             android:name=".activity.OTAActivity"/>
 
     </application>

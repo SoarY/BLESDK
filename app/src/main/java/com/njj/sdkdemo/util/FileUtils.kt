@@ -5,10 +5,7 @@ import android.content.ContentResolver
 import android.content.Context
 import android.net.Uri
 import android.provider.OpenableColumns
-import android.util.Log
-import java.io.File
-import java.io.FileOutputStream
-import java.io.IOException
+import java.io.*
 
 /**
  * NAME：YONG_
@@ -16,6 +13,20 @@ import java.io.IOException
  * Describe:
  */
 object FileUtils {
+
+    fun inputFile(path:String): ByteArray {
+        val inputStream: InputStream = FileInputStream(File(path))
+        val bufferedInputStream = BufferedInputStream(inputStream)
+        val byteArrayOutputStream = ByteArrayOutputStream()
+        var len = 0
+        val buf = ByteArray(1024)
+        while (bufferedInputStream.read(buf).also { len = it } != -1) {
+            byteArrayOutputStream.write(buf, 0, len)
+        }
+        byteArrayOutputStream.flush()
+        var buffer = byteArrayOutputStream.toByteArray()
+        return buffer
+    }
 
     fun uriToFile(context: Context, uri: Uri?): File? {
         if (uri == null)

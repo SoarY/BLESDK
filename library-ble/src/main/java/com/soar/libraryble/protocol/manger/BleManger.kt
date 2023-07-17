@@ -1,6 +1,7 @@
 package com.soar.libraryble.protocol.manger
 
 import android.content.Context
+import android.util.Log
 import com.inuker.bluetooth.library.BluetoothClient
 import com.inuker.bluetooth.library.Code
 import com.inuker.bluetooth.library.Constants

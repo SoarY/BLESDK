@@ -1,0 +1,45 @@
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <Button
+            android:id="@+id/bt_select_file"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:text="选择文件" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/bt_1"
+                android:layout_width="0dp"
+                android:layout_height="40dp"
+                android:layout_weight="1"
+                android:text="表盘推送" />
+
+            <Button
+                android:id="@+id/bt_2"
+                android:layout_marginLeft="20dp"
+                android:layout_width="0dp"
+                android:layout_height="40dp"
+                android:layout_weight="1"
+                android:text="联系人推送" />
+
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/bt_3"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:text="UI固件升级" />
+
+    </LinearLayout>
+
+</layout>

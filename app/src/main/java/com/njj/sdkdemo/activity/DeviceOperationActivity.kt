@@ -33,6 +33,10 @@ class DeviceOperationActivity : BaseActivity<ActivityDeviceBinding, DeviceOperat
             true
         }
 
+        mDinding.bt1.setOnClickListener {
+            OTABigDataActivity.open(context)
+        }
+
         mDinding.bt2.setOnClickListener {
             OTAActivity.open(context)
         }
