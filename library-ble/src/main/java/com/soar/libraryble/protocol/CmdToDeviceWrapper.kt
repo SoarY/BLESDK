@@ -60,11 +60,11 @@ class CmdToDeviceWrapper private constructor(): ICmdToDeviceWrapper {
         }
     }
 
-    override fun exSendBigData(data:ByteArray,index: Int): Observable<Boolean> {
+    override fun exSendBigData(data:ByteArray,index: Int): Observable<Int> {
         val bytes = CmdMergeImpl.exSendBigData(EVT_TYPE_OTA_DATA,data,index)
         BleManger.getInstance().writeData(bytes)
         return Observable.create{
-            ReadToDeviceWrapper.getInstance().endBigDataObserver= it
+            //ReadToDeviceWrapper.getInstance().endBigDataObserver= it
         }
     }
 }

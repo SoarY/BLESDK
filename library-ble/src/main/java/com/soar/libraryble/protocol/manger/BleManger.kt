@@ -1,7 +1,6 @@
 package com.soar.libraryble.protocol.manger
 
 import android.content.Context
-import android.util.Log
 import com.inuker.bluetooth.library.BluetoothClient
 import com.inuker.bluetooth.library.Code
 import com.inuker.bluetooth.library.Constants
@@ -12,7 +11,6 @@ import com.inuker.bluetooth.library.connect.response.BleWriteResponse
 import com.inuker.bluetooth.library.search.SearchRequest
 import com.inuker.bluetooth.library.search.SearchResult
 import com.inuker.bluetooth.library.search.response.SearchResponse
-import com.soar.libraryble.callback.CallBackManager
 import com.soar.libraryble.callback.SearchCallBack
 import com.soar.libraryble.constant.MUUIDConfig
 import com.soar.libraryble.entity.ABLEDevice
@@ -43,6 +41,9 @@ class BleManger private constructor(){
     }
 
     fun init(context:Context){
+        //final变量无法修改
+        // 修改蓝牙库最大缓存队列
+        //PrivateStaticFieldModifier.setPrivateStaticFieldValue(BleConnectDispatcher::class.java,"MAX_REQUEST_COUNT",90000)
         bluetoothClient = BluetoothClient(context)
     }
 

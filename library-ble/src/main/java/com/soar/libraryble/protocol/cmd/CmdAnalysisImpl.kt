@@ -14,9 +14,9 @@ object CmdAnalysisImpl {
         return String(resultByte)
     }
 
-    fun parserEndBigData(byteArray: ByteArray):Boolean{
+    fun parserEndBigData(byteArray: ByteArray):Int{
         val status = byteArray[4].toInt()
-        return status==0
+        return status
     }
 
 }

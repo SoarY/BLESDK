@@ -28,7 +28,7 @@ class ReadToDeviceWrapper private constructor(){
 
     var sendBigDataObserver: ObservableEmitter<Boolean>?=null
 
-    var endBigDataObserver: ObservableEmitter<Boolean>?=null
+    var endBigDataObserver: ObservableEmitter<Int>?=null
 
     companion object {
         @Volatile
@@ -91,8 +91,13 @@ class ReadToDeviceWrapper private constructor(){
                 sendBigDataObserver?.onNext(true)
             }
             EVT_TYPE_OTA_END->{
-                val b = CmdAnalysisImpl.parserEndBigData(value)
-                endBigDataObserver?.onNext(b)
+                val status = CmdAnalysisImpl.parserEndBigData(value)
+                var date1 = value[5].toInt() and (0xff)
+                var date2 = (value[6].toInt() and (0xff)).shl(8)
+                var pkg = date1 + date2
+
+                Log.i(TAG,"EVT_TYPE_OTA_END status:"+status+" pkg:"+pkg)
+                endBigDataObserver?.onNext(status)
             }
         }
 
