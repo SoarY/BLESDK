@@ -1,10 +1,9 @@
 package com.njj.sdkdemo.helper
 
 import android.annotation.SuppressLint
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import com.soar.cloud.util.FileUtils
+import com.soar.libraryble.callback.OTABigDataCallBack
 import com.soar.libraryble.protocol.CmdToDeviceWrapper
 import com.soar.libraryble.protocol.ReadToDeviceWrapper
 import io.reactivex.Observable
@@ -23,22 +22,55 @@ class PushDataHelper {
     val TAG = this.javaClass.simpleName
 
     private val chunkLength = 220
-    // 定义延迟时间（20毫秒）
-    private val delayTime = 20L
+    // 定义延迟时间
+    private val DELAY_TIME = 60L
+
+    private var disposable:Disposable?=null
 
     @SuppressLint("CheckResult")
-    fun startPush(path:String){
+    fun startPush(path:String,otaBigDataCallBack: OTABigDataCallBack?){
         Observable.create<ByteArray> {
             var buffer = FileUtils.inputFile(path)
             it.onNext(buffer)
         }.subscribeOn(Schedulers.io())
-            .subscribe {
+            .subscribe({
                 var buffer=it
                 CmdToDeviceWrapper.getInstance().sendBigData(1,buffer!!.size,chunkLength).subscribe{
                     val splitByteArray = splitByteArray(buffer)
-                    exSendBigData(splitByteArray)
+                    disposable = exSendBigData(0, splitByteArray, otaBigDataCallBack)
+                    setOtaBigDataCallBack(otaBigDataCallBack,splitByteArray)
                 }
+            }, {
+                otaBigDataCallBack?.onError(-1)
+            })
+    }
+
+    private fun setOtaBigDataCallBack(
+        otaBigDataCallBack: OTABigDataCallBack?,
+        splitByteArray: MutableList<ByteArray>
+    ) {
+        ReadToDeviceWrapper.getInstance().otaBigDataCallBack = object : OTABigDataCallBack {
+            override fun onSuccess() {
+                disposable?.dispose()
+                otaBigDataCallBack?.onSuccess()
             }
+
+            override fun onRepair(packId: Int) {
+                disposable?.dispose()
+                val startIndex = packId + 1
+                disposable = exSendBigData(startIndex.toLong(),splitByteArray,otaBigDataCallBack)
+                otaBigDataCallBack?.onRepair(startIndex)
+            }
+
+            override fun onError(errorCode: Int) {
+                disposable?.dispose()
+                otaBigDataCallBack?.onError(errorCode)
+            }
+
+            override fun onProgress(progress: Int) {
+            }
+
+        }
     }
 
     private fun splitByteArray(buffer: ByteArray): MutableList<ByteArray> {
@@ -59,28 +91,26 @@ class PushDataHelper {
         return dividedList
     }
 
-    private fun exSendBigData(splitByteArray: MutableList<ByteArray>) {
+    private fun exSendBigData(
+        startIndex: Long,
+        splitByteArray: MutableList<ByteArray>,
+        otaBigDataCallBack: OTABigDataCallBack?
+    ): Disposable {
         // 调用扩展函数，并传入循环处理的操作
-        val disposable = splitByteArray.loopWithDelay { index, byteArray ->
-            CmdToDeviceWrapper.getInstance().exSendBigData(byteArray,index).subscribe {
-                when (it) {
-                    0 -> Log.i(TAG,"sendBigData success")
-                    1 -> {
-
-                    }else -> {
-                    Log.i(TAG,"sendBigData fail")
-                }
+        return splitByteArray.loopWithDelay(startIndex) { index, byteArray ->
+            CmdToDeviceWrapper.getInstance().exSendBigData(byteArray,index){
+                if (splitByteArray.size!=0){
+                    val progress = (((index+1).toFloat() / splitByteArray.size)*100).toInt()
+                    otaBigDataCallBack?.onProgress(progress)
                 }
             }
         }
-
-        //disposable.dispose()
     }
 
     // 扩展函数：循环处理MutableList中的ByteArray并添加延迟
-    fun MutableList<ByteArray>.loopWithDelay(action: (index: Int, byteArray: ByteArray) -> Unit): Disposable {
+    fun MutableList<ByteArray>.loopWithDelay(startIndex: Long,action: (index: Int, byteArray: ByteArray) -> Unit): Disposable {
         // 使用intervalRange操作符创建一个定时器，初始延迟为0，每隔delayTime毫秒发射一个递增的长整型数，总共发射size次
-        return Observable.intervalRange(0, size.toLong(), 0, delayTime, TimeUnit.MILLISECONDS)
+        return Observable.intervalRange(startIndex, size.toLong()-startIndex, 0, DELAY_TIME, TimeUnit.MILLISECONDS)
             .observeOn(Schedulers.io()) // 将处理转移到IO线程执行
             .subscribe { index ->
                 if (index < size) {

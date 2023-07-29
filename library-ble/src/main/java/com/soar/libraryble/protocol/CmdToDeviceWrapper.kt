@@ -1,5 +1,7 @@
 package com.soar.libraryble.protocol
 
+import com.inuker.bluetooth.library.Constants
+import com.inuker.bluetooth.library.connect.response.BleWriteResponse
 import com.soar.libraryble.constant.*
 import com.soar.libraryble.protocol.cmd.CmdMergeImpl
 import com.soar.libraryble.protocol.imp.ICmdToDeviceWrapper
@@ -60,11 +62,12 @@ class CmdToDeviceWrapper private constructor(): ICmdToDeviceWrapper {
         }
     }
 
-    override fun exSendBigData(data:ByteArray,index: Int): Observable<Int> {
+    override fun exSendBigData(data:ByteArray,index: Int,response: BleWriteResponse?){
         val bytes = CmdMergeImpl.exSendBigData(EVT_TYPE_OTA_DATA,data,index)
-        BleManger.getInstance().writeData(bytes)
-        return Observable.create{
-            //ReadToDeviceWrapper.getInstance().endBigDataObserver= it
+        BleManger.getInstance().writeData(bytes){
+            if (it == Constants.REQUEST_SUCCESS) {
+                response?.onResponse(it)
+            }
         }
     }
 }

@@ -1,5 +1,6 @@
 package com.soar.libraryble.protocol.imp
 
+import com.inuker.bluetooth.library.connect.response.BleWriteResponse
 import io.reactivex.Observable
 import java.util.function.Consumer
 
@@ -17,5 +18,5 @@ interface ICmdToDeviceWrapper {
 
     fun  sendBigData(bigDataType:Int,size:Int,chunkLength:Int): Observable<Boolean>
 
-    fun  exSendBigData(data:ByteArray,index: Int): Observable<Int>
+    fun  exSendBigData(data:ByteArray,index: Int,response: BleWriteResponse?)
 }

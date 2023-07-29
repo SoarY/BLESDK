@@ -7,6 +7,7 @@ import com.inuker.bluetooth.library.Constants.STATUS_DISCONNECTED
 import com.inuker.bluetooth.library.connect.listener.BleConnectStatusListener
 import com.inuker.bluetooth.library.connect.response.BleNotifyResponse
 import com.soar.libraryble.callback.CallBackManager
+import com.soar.libraryble.callback.OTABigDataCallBack
 import com.soar.libraryble.constant.EVT_TYPE_FIRMWARE_VER
 import com.soar.libraryble.constant.EVT_TYPE_OTA_END
 import com.soar.libraryble.constant.EVT_TYPE_OTA_START
@@ -28,7 +29,7 @@ class ReadToDeviceWrapper private constructor(){
 
     var sendBigDataObserver: ObservableEmitter<Boolean>?=null
 
-    var endBigDataObserver: ObservableEmitter<Int>?=null
+    var otaBigDataCallBack: OTABigDataCallBack?=null
 
     companion object {
         @Volatile
@@ -92,12 +93,21 @@ class ReadToDeviceWrapper private constructor(){
             }
             EVT_TYPE_OTA_END->{
                 val status = CmdAnalysisImpl.parserEndBigData(value)
-                var date1 = value[5].toInt() and (0xff)
-                var date2 = (value[6].toInt() and (0xff)).shl(8)
-                var pkg = date1 + date2
 
-                Log.i(TAG,"EVT_TYPE_OTA_END status:"+status+" pkg:"+pkg)
-                endBigDataObserver?.onNext(status)
+                when (status) {
+                    0 -> otaBigDataCallBack?.onSuccess()
+                    1 -> {
+                        var date1 = value[5].toInt() and (0xff)
+                        var date2 = (value[6].toInt() and (0xff)).shl(8)
+                        var pkgId = date1 + date2
+                        otaBigDataCallBack?.onRepair(pkgId)
+                    }
+                    2,3,4,5 ->{
+                        otaBigDataCallBack?.onError(status)
+                    }else -> {
+                        Log.i(TAG, "EVT_TYPE_OTA_END: status:$status")
+                    }
+                }
             }
         }
 

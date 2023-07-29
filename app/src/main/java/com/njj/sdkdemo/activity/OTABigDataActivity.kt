@@ -16,6 +16,7 @@ import com.realsil.sdk.dfu.model.Throughput
 import com.realsil.sdk.dfu.utils.DfuAdapter
 import com.soar.cloud.util.FileUtils
 import com.soar.cloud.util.ToastUtils
+import com.soar.libraryble.callback.OTABigDataCallBack
 import com.soar.libraryble.callback.OTACallBack
 import com.soar.libraryble.protocol.manger.BleManger
 import com.soar.libraryble.protocol.manger.RYOTAManger
@@ -57,7 +58,25 @@ class OTABigDataActivity : BaseActivity<ActivityOtaBigDataBinding, BaseViewModel
             ToastUtils.showToast("请选择文件")
             return
         }
-        PushDataHelper().startPush(path!!)
+
+        PushDataHelper().startPush(path!!,object :OTABigDataCallBack{
+            override fun onSuccess() {
+                Log.i(TAG, "onSuccess: ")
+            }
+
+            override fun onRepair(packId: Int) {
+                Log.i(TAG, "onRepair: $packId")
+            }
+
+            override fun onError(errorCode: Int) {
+                Log.i(TAG, "onError: $errorCode")
+            }
+
+            override fun onProgress(progress: Int) {
+                Log.i(TAG, "onProgress: $progress")
+                mDinding.progressBarHorizontal.progress=progress
+            }
+        })
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
