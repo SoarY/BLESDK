@@ -54,7 +54,7 @@
                 android:layout_weight="1"
                 android:layout_height="match_parent"
                 android:layout_marginStart="10dp"
-                android:text="BT2" />
+                android:text="自定义表盘推送" />
 
         </LinearLayout>
     </LinearLayout>

@@ -83,4 +83,52 @@ object CmdMergeImpl {
         bytes[bytes.size-1]=checkData.toByte()
         return bytes
     }
+
+    fun getDialByte(
+        pos: Int,
+        color: String,
+        needWidth: Int,
+        needHeight: Int,
+        smallNeedWidth: Int,
+        smallNeedHeight: Int
+    ): ByteArray {
+        val red = Integer.parseInt(color.substring(0, 2), 16)
+        val green = Integer.parseInt(color.substring(2, 4), 16)
+        val blue = Integer.parseInt(color.substring(4, 6), 16)
+
+        val byte9= (needHeight and (0xff)).toByte()
+        val byte10 = ((needHeight.shr(8) and (0xff))).toByte()
+
+        val byte11= (needWidth and (0xff)).toByte()
+        val byte12 = ((needWidth.shr(8) and (0xff))).toByte()
+
+
+        val byte13= (smallNeedHeight and (0xff)).toByte()
+        val byte14 = ((smallNeedHeight.shr(8) and (0xff))).toByte()
+
+        val byte15= (smallNeedWidth and (0xff)).toByte()
+        val byte16 = ((smallNeedWidth.shr(8) and (0xff))).toByte()
+
+        val byteArrayOf = byteArrayOf(
+            0x00,
+            0x00,
+            0x00,
+            red.toByte(),
+            green.toByte(),
+            blue.toByte(),
+            0x00,
+            0x00,
+            byte9,
+            byte10,
+            byte11,
+            byte12,
+            byte13,
+            byte14,
+            byte15,
+            byte16,
+        )
+        byteArrayOf[0] = if (pos == 1) 0x0 else 0x01
+
+        return byteArrayOf;
+    }
 }

@@ -8,18 +8,10 @@ import com.njj.sdkdemo.R
 import com.njj.sdkdemo.base.BaseActivity
 import com.njj.sdkdemo.base.BaseViewModel
 import com.njj.sdkdemo.databinding.ActivityOtaBigDataBinding
-import com.njj.sdkdemo.databinding.ActivityOtaBinding
 import com.njj.sdkdemo.helper.PushDataHelper
-import com.realsil.sdk.dfu.DfuConstants
-import com.realsil.sdk.dfu.model.DfuProgressInfo
-import com.realsil.sdk.dfu.model.Throughput
-import com.realsil.sdk.dfu.utils.DfuAdapter
 import com.soar.cloud.util.FileUtils
 import com.soar.cloud.util.ToastUtils
 import com.soar.libraryble.callback.OTABigDataCallBack
-import com.soar.libraryble.callback.OTACallBack
-import com.soar.libraryble.protocol.manger.BleManger
-import com.soar.libraryble.protocol.manger.RYOTAManger
 
 class OTABigDataActivity : BaseActivity<ActivityOtaBigDataBinding, BaseViewModel>() {
 
@@ -59,7 +51,7 @@ class OTABigDataActivity : BaseActivity<ActivityOtaBigDataBinding, BaseViewModel
             return
         }
 
-        PushDataHelper().startPush(path!!,object :OTABigDataCallBack{
+        PushDataHelper().pushDialFile(path!!,object :OTABigDataCallBack{
             override fun onSuccess() {
                 Log.i(TAG, "onSuccess: ")
             }

@@ -1,14 +1,19 @@
 package com.njj.sdkdemo.helper
 
 import android.annotation.SuppressLint
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.util.Log
+import com.njj.sdkdemo.util.FileImgUtils
 import com.soar.cloud.util.FileUtils
 import com.soar.libraryble.callback.OTABigDataCallBack
 import com.soar.libraryble.protocol.CmdToDeviceWrapper
 import com.soar.libraryble.protocol.ReadToDeviceWrapper
+import com.soar.libraryble.protocol.cmd.CmdMergeImpl
 import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
+import java.nio.ByteBuffer
 import java.util.*
 import java.util.concurrent.TimeUnit
 
@@ -28,7 +33,71 @@ class PushDataHelper {
     private var disposable:Disposable?=null
 
     @SuppressLint("CheckResult")
-    fun startPush(path:String,otaBigDataCallBack: OTABigDataCallBack?){
+    fun pushDial(path:String,lcdWidth:Int,lcdHeight:Int,previewWidth:Int,previewHeight:Int,timePosition:Int,colors:String,
+                 otaBigDataCallBack: OTABigDataCallBack?){
+        Observable.create<ByteArray> {
+            var buffer=dialBuffer(path, lcdWidth, lcdHeight, previewWidth, previewHeight, timePosition, colors)
+            it.onNext(buffer)
+        }.subscribeOn(Schedulers.io())
+            .subscribe({
+                var buffer=it
+                CmdToDeviceWrapper.getInstance().sendBigData(1,buffer!!.size,chunkLength).subscribe{
+                    val splitByteArray = splitByteArray(buffer)
+                    disposable = exSendBigData(0, splitByteArray, otaBigDataCallBack)
+                    setOtaBigDataCallBack(otaBigDataCallBack,splitByteArray)
+                }
+            }, {
+                otaBigDataCallBack?.onError(-1)
+            })
+    }
+
+    private fun dialBuffer(path: String, lcdWidth: Int, lcdHeight: Int, previewWidth: Int, previewHeight: Int, timePosition: Int, colors: String): ByteArray {
+        val mBitmap = BitmapFactory.decodeFile(path)
+
+        val bitmap = FileImgUtils.getSmallBitmap(mBitmap, lcdWidth, lcdHeight)
+        val smallBitmap = FileImgUtils.getSmallBitmap(mBitmap, previewWidth, previewHeight)
+
+        val bg = getBufferByBitmap(bitmap!!)
+        val smallBg = getBufferByBitmap(smallBitmap!!)
+
+
+        var buffer = ByteArray(16 + bg!!.size + smallBg!!.size)
+        val defaultByte: ByteArray = CmdMergeImpl.getDialByte(
+            timePosition,
+            colors,
+            lcdWidth,
+            lcdHeight,
+            previewWidth,
+            previewHeight
+        )
+
+        System.arraycopy(defaultByte, 0, buffer, 0, defaultByte.size)
+        System.arraycopy(bg, 0, buffer, defaultByte.size, bg.size)
+        System.arraycopy(smallBg, 0, buffer, defaultByte.size + bg.size, smallBg.size)
+        return buffer
+    }
+
+    private fun getBufferByBitmap(bmap: Bitmap): ByteArray? {
+        val bytes = bmap.byteCount
+        val buffer = ByteBuffer.allocate(bytes)
+        bmap.copyPixelsToBuffer(buffer)
+        return changeArrayIndex(buffer.array())
+    }
+
+    private fun changeArrayIndex(bytes: ByteArray): ByteArray? {
+        var des: Byte
+        var i = 0
+        while (i < bytes.size) {
+            des = bytes[i]
+            bytes[i] = bytes[i + 1]
+            bytes[i + 1] = des
+            i += 2
+        }
+        return bytes
+    }
+
+    @SuppressLint("CheckResult")
+    fun pushDialFile(path:String, otaBigDataCallBack: OTABigDataCallBack?){
         Observable.create<ByteArray> {
             var buffer = FileUtils.inputFile(path)
             it.onNext(buffer)

@@ -40,6 +40,10 @@ class DeviceOperationActivity : BaseActivity<ActivityDeviceBinding, DeviceOperat
         mDinding.bt2.setOnClickListener {
             OTAActivity.open(context)
         }
+
+        mDinding.bt3.setOnClickListener {
+            DialCustomActivity.open(context)
+        }
     }
 
     private fun initData() {
